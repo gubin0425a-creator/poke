@@ -1,0 +1,14 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Temporary directories & video outputs
+temp/
+*.mp4
+output/*.mp4
+
+# Sensitive credentials & tokens
+.env
+client_secrets.json
+token.pickle
