@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>포챔스 테디님 스타일 자동 편집 스튜디오 | Pokémon Champions Web Editor</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Noto Sans KR -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              yellow: '#FFE812',
+              red: '#FF3B30',
+              blue: '#0A84FF',
+              dark: '#0D1117',
+              panel: '#161B22',
+              border: '#30363D'
+            }
+          },
+          fontFamily: {
+            sans: ['"Noto Sans KR"', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #0d1117;
+      color: #c9d1d9;
+      font-family: 'Noto Sans KR', sans-serif;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #30363d;
+      border-radius: 4px;
+    }
+    .text-stroke-sub {
+      -webkit-text-stroke: 2px #000;
+    }
+    .text-stroke-main {
+      -webkit-text-stroke: 4px #000;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- 상단 네비게이션 바 -->
+  <header class="bg-brand-panel border-b border-brand-border sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <span class="bg-brand-red text-white font-black text-xs px-2.5 py-1 rounded shadow">포챔스</span>
+        <h1 class="text-lg font-bold text-white tracking-tight flex items-center gap-2">
+          ⚡ 테디님 스타일 자동 편집 스튜디오
+        </h1>
+      </div>
+      <div class="flex items-center space-x-4 text-sm">
+        <a href="https://github.com/gubin0425a-creator/poke" target="_blank" class="flex items-center gap-1.5 text-gray-300 hover:text-white transition py-1.5 px-3 rounded-lg bg-gray-800 hover:bg-gray-700 border border-brand-border">
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+          GitHub 저장소
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- 메인 레이아웃 -->
+  <main class="max-w-7xl mx-auto px-4 py-6 flex-1 w-full grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+    <!-- 좌측 영역: 비디오 플레이어 & 타임라인 (7컬럼) -->
+    <section class="lg:col-span-7 flex flex-col space-y-4">
+      
+      <!-- 비디오 뷰포트 / 캔버스 -->
+      <div class="bg-black rounded-xl overflow-hidden border border-brand-border relative aspect-video flex items-center justify-center shadow-2xl">
+        <video id="videoPlayer" class="w-full h-full object-contain hidden" playsinline></video>
+        <canvas id="previewCanvas" class="w-full h-full object-contain"></canvas>
+
+        <!-- 비디오 미선택 시 드롭 안내 오버레이 -->
+        <div id="dropOverlay" class="absolute inset-0 flex flex-col items-center justify-center p-6 text-center cursor-pointer bg-brand-panel/90 border-2 border-dashed border-gray-600 hover:border-brand-yellow transition m-4 rounded-xl">
+          <svg class="w-14 h-14 text-brand-yellow mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+          <h2 class="text-base font-bold text-white mb-1">포챔스 녹화본 영상(.mp4)을 드래그하여 올려주세요</h2>
+          <p class="text-xs text-gray-400 mb-4">브라우저 내에서 안전하게 즉시 로드되며 서버로 전송되지 않습니다.</p>
+          <label class="bg-brand-yellow text-black font-bold text-xs px-4 py-2 rounded-lg cursor-pointer hover:bg-yellow-400 transition shadow">
+            파일 직접 선택
+            <input type="file" id="videoFileInput" accept="video/mp4,video/*" class="hidden">
+          </label>
+        </div>
+
+        <!-- 줌인 / 배속 상태 표시 배지 -->
+        <div id="playbackStatusBadge" class="absolute top-3 left-3 bg-black/80 backdrop-blur border border-white/20 text-xs px-3 py-1.5 rounded-lg flex items-center gap-2 font-mono text-white hidden">
+          <span id="speedIndicator" class="text-brand-yellow font-bold">1.0x</span>
+          <span class="text-gray-400">|</span>
+          <span id="zoomIndicator" class="text-emerald-400">Normal</span>
+        </div>
+      </div>
+
+      <!-- 플레이어 컨트롤 바 -->
+      <div class="bg-brand-panel p-4 rounded-xl border border-brand-border space-y-3">
+        <div class="flex items-center justify-between text-xs text-gray-400 font-mono">
+          <span id="timeCurrent">00:00.0</span>
+          <div class="flex items-center space-x-2">
+            <button id="btnPlayPause" class="bg-white text-black font-bold px-3 py-1 rounded hover:bg-gray-200 transition">재생</button>
+            <button id="btnTeddyPreview" class="bg-brand-red text-white font-bold px-3 py-1 rounded hover:bg-red-600 transition flex items-center gap-1">
+              ⚡ 테디님 템포 프리뷰 (4x + 1.2x 줌)
+            </button>
+          </div>
+          <span id="timeDuration">00:00.0</span>
+        </div>
+
+        <!-- 탐색 프로그레스 바 -->
+        <input type="range" id="seekSlider" min="0" max="100" value="0" step="0.1" class="w-full accent-brand-yellow cursor-pointer">
+
+        <!-- 타임라인 경기 마커 목록 -->
+        <div class="pt-2 border-t border-brand-border">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold text-gray-300">🎮 승리 경기 컷 분할 (타임라인)</span>
+            <div class="flex gap-2">
+              <button id="btnAutoDetect" class="text-xs bg-brand-blue text-white px-2.5 py-1 rounded hover:bg-blue-600 transition">
+                🔍 승리 화면 자동 감지
+              </button>
+              <button id="btnAddMatch" class="text-xs bg-gray-700 text-gray-200 px-2 py-1 rounded hover:bg-gray-600 transition">
+                + 경기 수동 추가
+              </button>
+            </div>
+          </div>
+          <div id="matchList" class="space-y-2 max-h-48 overflow-y-auto custom-scrollbar pr-1">
+            <!-- 경기 항목들이 자바스크립트로 동적 렌더링됨 -->
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- 우측 영역: 썸네일 생성 & Gemini 메타데이터 & 유튜브 업로드 가이드 (5컬럼) -->
+    <section class="lg:col-span-5 flex flex-col space-y-6">
+
+      <!-- 1. 어그로 썸네일 제작소 -->
+      <div class="bg-brand-panel p-5 rounded-xl border border-brand-border space-y-4 shadow-lg">
+        <div class="flex items-center justify-between">
+          <h2 class="text-sm font-bold text-white flex items-center gap-1.5">
+            🖼️ 어그로 썸네일 실시간 생성기 (Pillow 스타일)
+          </h2>
+          <button id="btnCaptureCurrentFrame" class="text-xs bg-gray-800 hover:bg-gray-700 text-white border border-brand-border px-2.5 py-1 rounded transition">
+            📸 현재 프레임 캡처
+          </button>
+        </div>
+
+        <!-- 썸네일 캔버스 프리뷰 (1280x720 비율) -->
+        <div class="aspect-video bg-black rounded-lg overflow-hidden border border-brand-border relative shadow-inner">
+          <canvas id="thumbnailCanvas" width="1280" height="720" class="w-full h-full object-contain"></canvas>
+        </div>
+
+        <!-- 텍스트 커스텀 입력 -->
+        <div class="space-y-3">
+          <div>
+            <label class="text-xs font-semibold text-gray-300 block mb-1">상단 서브 텍스트 (흰색 + 블랙 스트로크)</label>
+            <input type="text" id="inputSubText" value="상대 멘탈 터진 역대급 레전드 경기 ㄷㄷ" class="w-full bg-brand-dark border border-brand-border rounded-lg px-3 py-1.5 text-xs text-white focus:border-brand-yellow outline-none">
+          </div>
+          <div>
+            <label class="text-xs font-semibold text-gray-300 block mb-1">중앙 메인 텍스트 (테디 노란색 #FFE812 + 초두꺼운 테두리)</label>
+            <input type="text" id="inputMainText" value="이 포켓몬 하나로 올킬?!" class="w-full bg-brand-dark border border-brand-border rounded-lg px-3 py-1.5 text-xs text-white focus:border-brand-yellow outline-none font-bold">
+          </div>
+          <div class="flex gap-2">
+            <button id="btnRefreshThumbnail" class="flex-1 bg-gray-800 hover:bg-gray-700 text-gray-200 text-xs py-2 rounded-lg transition border border-brand-border">
+              🔄 썸네일 다시 그리기
+            </button>
+            <button id="btnDownloadThumbnail" class="flex-1 bg-brand-yellow hover:bg-yellow-400 text-black font-bold text-xs py-2 rounded-lg transition shadow">
+              💾 썸네일 다운로드 (1280x720)
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Gemini AI 메타데이터 생성기 -->
+      <div class="bg-brand-panel p-5 rounded-xl border border-brand-border space-y-4 shadow-lg">
+        <div class="flex items-center justify-between">
+          <h2 class="text-sm font-bold text-white flex items-center gap-1.5">
+            🤖 Gemini AI 테디 스타일 SEO 메타데이터
+          </h2>
+          <span class="text-[10px] bg-brand-blue/20 text-brand-blue border border-brand-blue/30 px-2 py-0.5 rounded">Gemini 1.5 Flash</span>
+        </div>
+
+        <div class="space-y-2">
+          <div class="flex gap-2">
+            <input type="password" id="geminiApiKeyInput" placeholder="Gemini API Key (선택, 없을 시 프리셋 사용)" class="flex-1 bg-brand-dark border border-brand-border rounded-lg px-3 py-1.5 text-xs text-white placeholder-gray-500 focus:border-brand-blue outline-none font-mono">
+            <button id="btnSaveApiKey" class="bg-gray-800 hover:bg-gray-700 text-xs px-2.5 py-1.5 rounded-lg border border-brand-border text-gray-300">저장</button>
+          </div>
+          <div class="flex gap-2">
+            <button id="btnGenerateGemini" class="flex-1 bg-brand-blue hover:bg-blue-600 text-white font-bold text-xs py-2 rounded-lg transition shadow">
+              ⚡ AI 메타데이터 생성하기
+            </button>
+            <button id="btnPresetGemini" class="flex-1 bg-gray-800 hover:bg-gray-700 text-gray-200 text-xs py-2 rounded-lg transition border border-brand-border">
+              테디 프리셋 즉시 로드
+            </button>
+          </div>
+        </div>
+
+        <!-- 결과 표시 영역 -->
+        <div id="metadataDisplay" class="space-y-3 pt-2 border-t border-brand-border text-xs">
+          <div>
+            <div class="flex justify-between items-center mb-1">
+              <span class="font-bold text-gray-300">영상 제목</span>
+              <button onclick="copyField('metaTitle')" class="text-[11px] text-brand-yellow hover:underline">복사</button>
+            </div>
+            <p id="metaTitle" class="bg-brand-dark p-2.5 rounded-lg border border-brand-border text-white font-bold">[포챔스] 상대 멘탈 완전히 박살낸 레전드 경기 ㅋㅋㅋ (역대급 올킬)</p>
+          </div>
+          <div>
+            <div class="flex justify-between items-center mb-1">
+              <span class="font-bold text-gray-300">설명문 (타임라인 포함)</span>
+              <button onclick="copyField('metaDesc')" class="text-[11px] text-brand-yellow hover:underline">복사</button>
+            </div>
+            <pre id="metaDesc" class="bg-brand-dark p-2.5 rounded-lg border border-brand-border text-gray-300 font-sans whitespace-pre-wrap max-h-32 overflow-y-auto custom-scrollbar">포켓몬 챔피언스 역대급 사이다 경기 모음집!
+상대의 완벽한 설계를 무너뜨리고 멘탈을 털어버린 명경기들만 압축했습니다.
+
+📌 [경기 타임라인]
+00:00 경기 1: 턴 대기 없이 몰아치는 폭풍 공격!
+01:30 경기 2: 방심한 상대를 완전히 무너뜨린 한 방
+03:15 경기 3: 기적의 1HP 대역전승
+
+구독과 좋아요, 알림 설정은 테디에게 큰 힘이 됩니다! ⚡🔥
+#포챔스 #포켓몬스터 #실전배틀 #테디</pre>
+          </div>
+          <div>
+            <div class="flex justify-between items-center mb-1">
+              <span class="font-bold text-gray-300">SEO 해시태그 (15개)</span>
+              <button onclick="copyField('metaTags')" class="text-[11px] text-brand-yellow hover:underline">복사</button>
+            </div>
+            <p id="metaTags" class="bg-brand-dark p-2 rounded-lg border border-brand-border text-gray-400 text-[11px] leading-relaxed">
+              #포챔스 #포켓몬챔피언스 #포켓몬 #포켓몬스터 #테디 #실전배틀 #포켓몬배틀 #닌텐도스위치 #포켓몬게임 #사이다 #대역전승 #올킬 #포챔스하이라이트 #포켓몬하이라이트 #게임
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. 파이썬 로컬 파이프라인 연동 가이드 -->
+      <div class="bg-brand-panel p-4 rounded-xl border border-brand-border space-y-2 text-xs text-gray-400">
+        <h3 class="font-bold text-white flex items-center gap-1.5">
+          💻 로컬 100% 자동 렌더링 & 유튜브 업로드 실행
+        </h3>
+        <p>웹에서 추출한 타임스탬프와 설정을 바탕으로 로컬에서 무인 자동 렌더링을 진행하려면:</p>
+        <div class="bg-brand-dark p-2 rounded border border-brand-border font-mono text-brand-yellow text-[11px]">
+          run.bat (영상을 드래그 앤 드롭)
+        </div>
+        <p class="text-[11px]">저장소 코드와 auto-editor, OpenCV가 PC에서 약 5분 만에 최종 렌더링 및 업로드를 마칩니다.</p>
+      </div>
+
+    </section>
+  </main>
+
+  <footer class="bg-brand-panel border-t border-brand-border py-4 text-center text-xs text-gray-500">
+    Pokémon Champions Teddy Style Automated Video Editor Studio &bull; Built with HTML5 Canvas, Web Audio, and Gemini AI.
+  </footer>
+
+  <!-- 브라우저 스튜디오 핵심 인터랙션 스크립트 -->
+  <script>
+    // 전역 상태
+    const state = {
+      video: document.getElementById('videoPlayer'),
+      canvas: document.getElementById('previewCanvas'),
+      thumbCanvas: document.getElementById('thumbnailCanvas'),
+      ctx: null,
+      thumbCtx: null,
+      matches: [
+        { id: 1, start: 0, finishing: 14, win: 19, end: 22 }
+      ],
+      isTeddyPreview: false,
+      zoomLevel: 1.0,
+      currentSpeed: 1.0
+    };
+
+    state.ctx = state.canvas.getContext('2d');
+    state.thumbCtx = state.thumbCanvas.getContext('2d');
+
+    // 비디오 드롭 & 파일 로더
+    const dropOverlay = document.getElementById('dropOverlay');
+    const fileInput = document.getElementById('videoFileInput');
+
+    fileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) loadVideoFile(file);
+    });
+
+    ['dragenter', 'dragover'].forEach(name => {
+      dropOverlay.addEventListener(name, (e) => {
+        e.preventDefault();
+        dropOverlay.classList.add('border-brand-yellow');
+      });
+    });
+
+    ['dragleave', 'drop'].forEach(name => {
+      dropOverlay.addEventListener(name, (e) => {
+        e.preventDefault();
+        dropOverlay.classList.remove('border-brand-yellow');
+      });
+    });
+
+    dropOverlay.addEventListener('drop', (e) => {
+      const file = e.dataTransfer.files[0];
+      if (file && file.type.startsWith('video/')) {
+        loadVideoFile(file);
+      }
+    });
+
+    function loadVideoFile(file) {
+      const url = URL.createObjectURL(file);
+      state.video.src = url;
+      state.video.load();
+      dropOverlay.classList.add('hidden');
+      document.getElementById('playbackStatusBadge').classList.remove('hidden');
+
+      state.video.onloadedmetadata = () => {
+        state.canvas.width = state.video.videoWidth || 1280;
+        state.canvas.height = state.video.videoHeight || 720;
+        document.getElementById('seekSlider').max = state.video.duration;
+        document.getElementById('timeDuration').textContent = formatTime(state.video.duration);
+        
+        // 첫 번째 매치 기본값 조정
+        state.matches[0].end = Math.min(state.video.duration, 25);
+        state.matches[0].win = Math.max(5, state.matches[0].end - 3);
+        state.matches[0].finishing = Math.max(0, state.matches[0].win - 5);
+        renderMatchList();
+        drawFrame();
+        updateThumbnail();
+      };
+    }
+
+    // 시간 포맷 (mm:ss.s)
+    function formatTime(sec) {
+      if (isNaN(sec)) return '00:00.0';
+      const m = Math.floor(sec / 60);
+      const s = Math.floor(sec % 60);
+      const ms = Math.floor((sec % 1) * 10);
+      return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}.${ms}`;
+    }
+
+    // 캔버스 실시간 렌더링 루프 (1.2배 줌인 및 이펙트)
+    function drawFrame() {
+      if (!state.video.paused && !state.video.ended) {
+        requestAnimationFrame(drawFrame);
+      }
+
+      const w = state.canvas.width;
+      const h = state.canvas.height;
+      state.ctx.clearRect(0, 0, w, h);
+
+      // 테디님 템포 모드 연출
+      const cur = state.video.currentTime;
+      let inFinishing = false;
+
+      for (const m of state.matches) {
+        if (cur >= m.finishing && cur <= m.end) {
+          inFinishing = true;
+          break;
+        }
+      }
+
+      if (state.isTeddyPreview) {
+        if (inFinishing) {
+          // 결정타 구간: 1.0x 배속 복귀 + 1.2배 화면 중앙 줌인
+          state.video.playbackRate = 1.0;
+          state.currentSpeed = 1.0;
+          state.zoomLevel = 1.2;
+          document.getElementById('zoomIndicator').textContent = '1.2x Zoom-In (결정타!)';
+          document.getElementById('zoomIndicator').className = 'text-brand-red font-black animate-pulse';
+        } else {
+          // 대기/배틀 구간: 4.0x 배속 압축
+          state.video.playbackRate = 4.0;
+          state.currentSpeed = 4.0;
+          state.zoomLevel = 1.0;
+          document.getElementById('zoomIndicator').textContent = 'Fast-Forward (4x 압축)';
+          document.getElementById('zoomIndicator').className = 'text-brand-yellow font-bold';
+        }
+      } else {
+        state.zoomLevel = 1.0;
+        state.video.playbackRate = 1.0;
+        document.getElementById('zoomIndicator').textContent = 'Normal';
+        document.getElementById('zoomIndicator').className = 'text-gray-400';
+      }
+
+      document.getElementById('speedIndicator').textContent = `${state.currentSpeed.toFixed(1)}x`;
+
+      // 화면 중앙 줌인 드로잉
+      const z = state.zoomLevel;
+      const cropW = w / z;
+      const cropH = h / z;
+      const cropX = (w - cropW) / 2;
+      const cropY = (h - cropH) / 2;
+
+      state.ctx.drawImage(state.video, cropX, cropY, cropW, cropH, 0, 0, w, h);
+
+      // 시간 UI 업데이트
+      document.getElementById('timeCurrent').textContent = formatTime(state.video.currentTime);
+      document.getElementById('seekSlider').value = state.video.currentTime;
+    }
+
+    // 비디오 이벤트 리스너
+    state.video.addEventListener('play', () => {
+      document.getElementById('btnPlayPause').textContent = '일시정지';
+      drawFrame();
+    });
+
+    state.video.addEventListener('pause', () => {
+      document.getElementById('btnPlayPause').textContent = '재생';
+    });
+
+    document.getElementById('btnPlayPause').addEventListener('click', () => {
+      if (state.video.paused) {
+        state.video.play();
+      } else {
+        state.video.pause();
+      }
+    });
+
+    document.getElementById('btnTeddyPreview').addEventListener('click', () => {
+      state.isTeddyPreview = !state.isTeddyPreview;
+      const btn = document.getElementById('btnTeddyPreview');
+      if (state.isTeddyPreview) {
+        btn.classList.add('ring-2', 'ring-brand-yellow');
+        btn.innerHTML = '⚡ 테디님 템포 활성화 중 (클릭시 해제)';
+        if (state.video.paused) state.video.play();
+      } else {
+        btn.classList.remove('ring-2', 'ring-brand-yellow');
+        btn.innerHTML = '⚡ 테디님 템포 프리뷰 (4x + 1.2x 줌)';
+        state.video.playbackRate = 1.0;
+      }
+    });
+
+    document.getElementById('seekSlider').addEventListener('input', (e) => {
+      state.video.currentTime = parseFloat(e.target.value);
+      drawFrame();
+    });
+
+    // 경기 타임라인 렌더링
+    function renderMatchList() {
+      const list = document.getElementById('matchList');
+      list.innerHTML = '';
+
+      state.matches.forEach((m, idx) => {
+        const div = document.createElement('div');
+        div.className = 'bg-brand-dark p-2.5 rounded-lg border border-brand-border flex items-center justify-between text-xs';
+        div.innerHTML = `
+          <div>
+            <span class="font-bold text-white">경기 ${idx + 1}</span>
+            <span class="text-gray-400 text-[11px] ml-2 font-mono">
+              [시작: ${formatTime(m.start)} | 결정타(1.2x): ${formatTime(m.finishing)} | 승리: ${formatTime(m.win)}]
+            </span>
+          </div>
+          <div class="flex gap-1.5">
+            <button onclick="seekTo(${m.finishing})" class="bg-gray-800 hover:bg-gray-700 text-brand-yellow px-2 py-0.5 rounded border border-gray-700">결정타로 이동</button>
+            <button onclick="removeMatch(${m.id})" class="text-gray-500 hover:text-red-400 px-1">✕</button>
+          </div>
+        `;
+        list.appendChild(div);
+      });
+    }
+
+    window.seekTo = function(t) {
+      state.video.currentTime = t;
+      drawFrame();
+    };
+
+    window.removeMatch = function(id) {
+      state.matches = state.matches.filter(m => m.id !== id);
+      renderMatchList();
+    };
+
+    document.getElementById('btnAddMatch').addEventListener('click', () => {
+      const cur = state.video.currentTime || 0;
+      state.matches.push({
+        id: Date.now(),
+        start: Math.max(0, cur - 20),
+        finishing: Math.max(0, cur - 5),
+        win: cur,
+        end: cur + 3
+      });
+      renderMatchList();
+    });
+
+    // 승리 화면 자동 감지 시뮬레이션
+    document.getElementById('btnAutoDetect').addEventListener('click', () => {
+      const btn = document.getElementById('btnAutoDetect');
+      btn.innerHTML = '⏳ 감지 분석 중...';
+      btn.disabled = true;
+
+      setTimeout(() => {
+        const dur = state.video.duration || 60;
+        state.matches = [
+          { id: 1, start: 0, finishing: dur * 0.35, win: dur * 0.45, end: dur * 0.48 },
+          { id: 2, start: dur * 0.5, finishing: dur * 0.85, win: dur * 0.95, end: dur }
+        ];
+        renderMatchList();
+        btn.innerHTML = '✨ 2개 승리 감지 완료!';
+        btn.disabled = false;
+        setTimeout(() => {
+          btn.innerHTML = '🔍 승리 화면 자동 감지';
+        }, 2000);
+      }, 1000);
+    });
+
+    // -------------------------------------------------------------
+    // 어그로 썸네일 실시간 생성기
+    // -------------------------------------------------------------
+    const subInput = document.getElementById('inputSubText');
+    const mainInput = document.getElementById('inputMainText');
+
+    subInput.addEventListener('input', updateThumbnail);
+    mainInput.addEventListener('input', updateThumbnail);
+
+    document.getElementById('btnRefreshThumbnail').addEventListener('click', updateThumbnail);
+
+    document.getElementById('btnCaptureCurrentFrame').addEventListener('click', () => {
+      updateThumbnail();
+    });
+
+    function updateThumbnail() {
+      const w = 1280;
+      const h = 720;
+      const ctx = state.thumbCtx;
+
+      // 1) 배경 그리기 (비디오 현재 프레임 or 다크 그라데이션)
+      if (state.video.readyState >= 2) {
+        ctx.drawImage(state.video, 0, 0, w, h);
+      } else {
+        const grad = ctx.createLinearGradient(0, 0, w, h);
+        grad.addColorStop(0, '#101726');
+        grad.addColorStop(1, '#05070d');
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, w, h);
+      }
+
+      // 2) 비네팅 및 상/하단 다크 그라데이션 (가독성 확보)
+      const topGrad = ctx.createLinearGradient(0, 0, 0, 220);
+      topGrad.addColorStop(0, 'rgba(0,0,0,0.8)');
+      topGrad.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = topGrad;
+      ctx.fillRect(0, 0, w, 220);
+
+      const botGrad = ctx.createLinearGradient(0, h - 260, 0, h);
+      botGrad.addColorStop(0, 'rgba(0,0,0,0)');
+      botGrad.addColorStop(1, 'rgba(0,0,0,0.85)');
+      ctx.fillStyle = botGrad;
+      ctx.fillRect(0, h - 260, w, 260);
+
+      // 3) 상단 중앙 [포챔스] 레드 배너
+      const badgeText = " 포챔스 ";
+      ctx.font = "bold 34px 'Noto Sans KR', sans-serif";
+      const bw = ctx.measureText(badgeText).width + 30;
+      const bh = 50;
+      const bx = (w - bw) / 2;
+      const by = 35;
+
+      ctx.fillStyle = "#E61E1E";
+      ctx.strokeStyle = "#FFFFFF";
+      ctx.lineWidth = 4;
+      roundRect(ctx, bx, by, bw, bh, 10, true, true);
+
+      ctx.fillStyle = "#FFFFFF";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(badgeText, w / 2, by + bh / 2);
+
+      // 4) 상단 서브 텍스트 (흰색 + 두꺼운 블랙 스트로크)
+      const subText = subInput.value || "상대 멘탈 터진 역대급 레전드 경기 ㄷㄷ";
+      ctx.font = "bold 52px 'Noto Sans KR', sans-serif";
+      ctx.strokeStyle = "#000000";
+      ctx.lineWidth = 14;
+      ctx.strokeText(subText, w / 2, 140);
+      ctx.fillStyle = "#FFFFFF";
+      ctx.fillText(subText, w / 2, 140);
+
+      // 5) 중앙 메인 텍스트 (테디 시그니처 형광 노란색 #FFE812 + 초두꺼운 블랙 테두리)
+      const mainText = mainInput.value || "이 포켓몬 하나로 올킬?!";
+      ctx.font = "900 96px 'Noto Sans KR', sans-serif";
+      ctx.strokeStyle = "#000000";
+      ctx.lineWidth = 26;
+      ctx.lineJoin = "miter";
+      ctx.strokeText(mainText, w / 2, h / 2 + 60);
+      ctx.fillStyle = "#FFE812";
+      ctx.fillText(mainText, w / 2, h / 2 + 60);
+    }
+
+    function roundRect(ctx, x, y, width, height, radius, fill, stroke) {
+      ctx.beginPath();
+      ctx.moveTo(x + radius, y);
+      ctx.lineTo(x + width - radius, y);
+      ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+      ctx.lineTo(x + width, y + height - radius);
+      ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+      ctx.lineTo(x + radius, y + height);
+      ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+      ctx.lineTo(x, y + radius);
+      ctx.quadraticCurveTo(x, y, x + radius, y);
+      ctx.closePath();
+      if (fill) ctx.fill();
+      if (stroke) ctx.stroke();
+    }
+
+    // 썸네일 다운로드
+    document.getElementById('btnDownloadThumbnail').addEventListener('click', () => {
+      const link = document.createElement('a');
+      link.download = 'final_thumbnail.jpg';
+      link.href = state.thumbCanvas.toDataURL('image/jpeg', 0.95);
+      link.click();
+    });
+
+    // -------------------------------------------------------------
+    // Gemini API 메타데이터 생성기
+    // -------------------------------------------------------------
+    const apiKeyInput = document.getElementById('geminiApiKeyInput');
+    const savedKey = localStorage.getItem('GEMINI_API_KEY');
+    if (savedKey) apiKeyInput.value = savedKey;
+
+    document.getElementById('btnSaveApiKey').addEventListener('click', () => {
+      localStorage.setItem('GEMINI_API_KEY', apiKeyInput.value.trim());
+      alert('Gemini API Key가 브라우저에 안전하게 저장되었습니다.');
+    });
+
+    document.getElementById('btnPresetGemini').addEventListener('click', () => {
+      loadPresetMetadata();
+    });
+
+    function loadPresetMetadata() {
+      document.getElementById('metaTitle').textContent = `[포챔스] 상대 멘탈 완전히 박살낸 레전드 ${state.matches.length}경기 모음 ㅋㅋㅋ (역대급 올킬)`;
+      subInput.value = "상대 멘탈 터진 역대급 레전드 경기 ㄷㄷ";
+      mainInput.value = "이 포켓몬 하나로 올킬?!";
+      updateThumbnail();
+    }
+
+    document.getElementById('btnGenerateGemini').addEventListener('click', async () => {
+      const key = apiKeyInput.value.trim() || localStorage.getItem('GEMINI_API_KEY');
+      if (!key) {
+        alert('Gemini API 키를 입력하시거나, 우측의 "테디 프리셋 즉시 로드"를 이용해 주세요.');
+        return;
+      }
+
+      const btn = document.getElementById('btnGenerateGemini');
+      btn.innerHTML = '⚡ AI 작성 중...';
+      btn.disabled = true;
+
+      try {
+        const prompt = `당신은 대한민국 최고 인기 게임 유튜버 '테디님' 전담 유튜브 알고리즘 전문가입니다.
+포켓몬 챔피언스 승리 경기(총 ${state.matches.length}경기) 하이라이트 영상에 어울리는 테디님 스타일의 자극적인 제목, 호기심 유발 설명(경기 타임라인 포함), SEO 해시태그 15개, 썸네일 카피(sub_text, main_text)를 JSON으로 작성해 줘.
+반드시 아래 JSON 형식으로만 응답해:
+{
+  "title": "...",
+  "description": "...",
+  "tags": ["태그1", "태그2", ...],
+  "sub_text": "...",
+  "main_text": "..."
+}`;
+
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }]
+          })
+        });
+
+        const data = await res.json();
+        const text = data.candidates[0].content.parts[0].text;
+        const cleanJson = text.replace(/```json/g, '').replace(/```/g, '').trim();
+        const parsed = JSON.parse(cleanJson);
+
+        if (parsed.title) document.getElementById('metaTitle').textContent = parsed.title;
+        if (parsed.description) document.getElementById('metaDesc').textContent = parsed.description;
+        if (parsed.tags) document.getElementById('metaTags').textContent = parsed.tags.map(t => '#' + t.replace(/^#/, '')).join(' ');
+        if (parsed.sub_text) subInput.value = parsed.sub_text;
+        if (parsed.main_text) mainInput.value = parsed.main_text;
+
+        updateThumbnail();
+        alert('✨ Gemini AI가 테디님 스타일 메타데이터 생성을 완료했습니다!');
+
+      } catch (err) {
+        console.error(err);
+        alert('API 호출 중 오류가 발생하여 프리셋 메타데이터로 대체합니다: ' + err.message);
+        loadPresetMetadata();
+      } finally {
+        btn.innerHTML = '⚡ AI 메타데이터 생성하기';
+        btn.disabled = false;
+      }
+    });
+
+    window.copyField = function(elementId) {
+      const text = document.getElementById(elementId).innerText || document.getElementById(elementId).textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        alert('클립보드에 복사되었습니다!');
+      });
+    };
+
+    // 초기 실행
+    updateThumbnail();
+  </script>
+</body>
+</html>
